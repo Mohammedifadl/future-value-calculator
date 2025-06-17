@@ -1,0 +1,800 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>حاسبة القيمة المستقبلية - Future Value Calculator</title>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/3.9.1/chart.min.js"></script>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+            background: rgba(255, 255, 255, 0.95);
+            border-radius: 20px;
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.1);
+            overflow: hidden;
+            backdrop-filter: blur(10px);
+        }
+
+        .header {
+            background: linear-gradient(135deg, #2c3e50 0%, #3498db 100%);
+            color: white;
+            text-align: center;
+            padding: 30px;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .header::before {
+            content: '';
+            position: absolute;
+            top: -50%;
+            right: -50%;
+            width: 200%;
+            height: 200%;
+            background: repeating-linear-gradient(
+                45deg,
+                transparent,
+                transparent 10px,
+                rgba(255,255,255,0.1) 10px,
+                rgba(255,255,255,0.1) 20px
+            );
+            animation: slide 20s linear infinite;
+        }
+
+        @keyframes slide {
+            0% { transform: translate(-50%, -50%) rotate(0deg); }
+            100% { transform: translate(-50%, -50%) rotate(360deg); }
+        }
+
+        .header h1 {
+            font-size: 2.5rem;
+            margin-bottom: 10px;
+            position: relative;
+            z-index: 2;
+        }
+
+        .header p {
+            font-size: 1.2rem;
+            opacity: 0.9;
+            position: relative;
+            z-index: 2;
+        }
+
+        .main-content {
+            display: grid;
+            grid-template-columns: 1fr 2fr;
+            gap: 30px;
+            padding: 30px;
+        }
+
+        .input-section {
+            background: white;
+            border-radius: 15px;
+            padding: 25px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+            height: fit-content;
+        }
+
+        .input-section h2 {
+            color: #2c3e50;
+            margin-bottom: 25px;
+            font-size: 1.5rem;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .form-group {
+            margin-bottom: 20px;
+        }
+
+        .form-group label {
+            display: block;
+            color: #2c3e50;
+            margin-bottom: 8px;
+            font-weight: 600;
+            font-size: 1rem;
+        }
+
+        .form-group input,
+        .form-group select {
+            width: 100%;
+            padding: 12px 15px;
+            border: 2px solid #e0e0e0;
+            border-radius: 10px;
+            font-size: 1rem;
+            transition: all 0.3s ease;
+            background: #f8f9fa;
+        }
+
+        .form-group input:focus,
+        .form-group select:focus {
+            outline: none;
+            border-color: #3498db;
+            background: white;
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(52, 152, 219, 0.2);
+        }
+
+        .button-group {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 15px;
+            margin-top: 25px;
+        }
+
+        .btn {
+            padding: 12px 20px;
+            border: none;
+            border-radius: 10px;
+            font-size: 1rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+        }
+
+        .btn-primary {
+            background: linear-gradient(135deg, #3498db, #2980b9);
+            color: white;
+        }
+
+        .btn-secondary {
+            background: linear-gradient(135deg, #e74c3c, #c0392b);
+            color: white;
+        }
+
+        .btn-success {
+            background: linear-gradient(135deg, #27ae60, #229954);
+            color: white;
+            grid-column: 1 / -1;
+        }
+
+        .btn:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.2);
+        }
+
+        .results-section {
+            display: grid;
+            grid-template-rows: auto 1fr;
+            gap: 20px;
+        }
+
+        .results-cards {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 20px;
+        }
+
+        .result-card {
+            background: white;
+            border-radius: 15px;
+            padding: 25px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+            text-align: center;
+            transition: all 0.3s ease;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .result-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 4px;
+            background: linear-gradient(135deg, #3498db, #2980b9);
+        }
+
+        .result-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.15);
+        }
+
+        .result-card h3 {
+            color: #2c3e50;
+            margin-bottom: 10px;
+            font-size: 1.1rem;
+        }
+
+        .result-card .value {
+            font-size: 2rem;
+            font-weight: bold;
+            color: #3498db;
+            margin-bottom: 5px;
+        }
+
+        .result-card .currency {
+            color: #7f8c8d;
+            font-size: 0.9rem;
+        }
+
+        .chart-container {
+            background: white;
+            border-radius: 15px;
+            padding: 25px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+            height: 400px;
+        }
+
+        .progress-bar {
+            width: 100%;
+            height: 6px;
+            background: #ecf0f1;
+            border-radius: 3px;
+            overflow: hidden;
+            margin: 20px 0;
+        }
+
+        .progress-fill {
+            height: 100%;
+            background: linear-gradient(135deg, #3498db, #2980b9);
+            border-radius: 3px;
+            transition: width 2s ease;
+            width: 0%;
+        }
+
+        .summary-section {
+            background: white;
+            border-radius: 15px;
+            padding: 25px;
+            margin-top: 20px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+        }
+
+        .summary-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 20px;
+        }
+
+        .summary-item {
+            text-align: center;
+            padding: 15px;
+            border-radius: 10px;
+            background: linear-gradient(135deg, #f8f9fa, #e9ecef);
+        }
+
+        .summary-item .label {
+            color: #6c757d;
+            font-size: 0.9rem;
+            margin-bottom: 5px;
+        }
+
+        .summary-item .value {
+            color: #2c3e50;
+            font-size: 1.2rem;
+            font-weight: bold;
+        }
+
+        @media (max-width: 768px) {
+            .main-content {
+                grid-template-columns: 1fr;
+            }
+            
+            .header h1 {
+                font-size: 2rem;
+            }
+            
+            .button-group {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        .animate-number {
+            animation: countUp 2s ease-out;
+        }
+
+        @keyframes countUp {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .theme-toggle {
+            position: absolute;
+            top: 20px;
+            left: 20px;
+            background: rgba(255, 255, 255, 0.2);
+            border: none;
+            border-radius: 50%;
+            width: 50px;
+            height: 50px;
+            color: white;
+            cursor: pointer;
+            font-size: 1.2rem;
+            transition: all 0.3s ease;
+            z-index: 3;
+        }
+
+        .theme-toggle:hover {
+            background: rgba(255, 255, 255, 0.3);
+            transform: rotate(180deg);
+        }
+
+        .floating-shapes {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+            z-index: -1;
+        }
+
+        .shape {
+            position: absolute;
+            opacity: 0.1;
+            animation: float 6s ease-in-out infinite;
+        }
+
+        .shape:nth-child(1) {
+            top: 10%;
+            left: 10%;
+            animation-delay: 0s;
+        }
+
+        .shape:nth-child(2) {
+            top: 20%;
+            right: 10%;
+            animation-delay: 2s;
+        }
+
+        .shape:nth-child(3) {
+            bottom: 10%;
+            left: 20%;
+            animation-delay: 4s;
+        }
+
+        @keyframes float {
+            0%, 100% { transform: translateY(0px) rotate(0deg); }
+            50% { transform: translateY(-20px) rotate(180deg); }
+        }
+    </style>
+</head>
+<body>
+    <div class="floating-shapes">
+        <div class="shape">💰</div>
+        <div class="shape">📊</div>
+        <div class="shape">💎</div>
+    </div>
+
+    <div class="container">
+        <header class="header">
+            <button class="theme-toggle" onclick="toggleTheme()">
+                <i class="fas fa-moon"></i>
+            </button>
+            <h1>🚀 حاسبة القيمة المستقبلية المطورة</h1>
+            <p>خطط لمستقبلك المالي بذكاء وبصيرة</p>
+        </header>
+
+        <main class="main-content">
+            <section class="input-section">
+                <h2>
+                    <i class="fas fa-calculator"></i>
+                    المدخلات
+                </h2>
+                
+                <div class="form-group">
+                    <label for="principal">💰 المبلغ الأساسي (ريال)</label>
+                    <input type="number" id="principal" value="10000" min="0" step="100">
+                </div>
+
+                <div class="form-group">
+                    <label for="rate">📈 معدل الفائدة السنوي (%)</label>
+                    <input type="number" id="rate" value="7" min="0" max="100" step="0.1">
+                </div>
+
+                <div class="form-group">
+                    <label for="years">⏰ عدد السنوات</label>
+                    <input type="number" id="years" value="10" min="1" max="50" step="1">
+                </div>
+
+                <div class="form-group">
+                    <label for="compound">🔄 تكرار التركيب</label>
+                    <select id="compound">
+                        <option value="1">سنوياً</option>
+                        <option value="2">نصف سنوي</option>
+                        <option value="4">ربع سنوي</option>
+                        <option value="12">شهرياً</option>
+                        <option value="365">يومياً</option>
+                    </select>
+                </div>
+
+                <div class="form-group">
+                    <label for="payment">💳 الدفعة الشهرية الإضافية (ريال)</label>
+                    <input type="number" id="payment" value="500" min="0" step="50">
+                </div>
+
+                <div class="form-group">
+                    <label for="inflation">📉 معدل التضخم السنوي (%)</label>
+                    <input type="number" id="inflation" value="2.5" min="0" max="20" step="0.1">
+                </div>
+
+                <div class="button-group">
+                    <button class="btn btn-primary" onclick="calculate()">
+                        <i class="fas fa-calculator"></i>
+                        احسب
+                    </button>
+                    <button class="btn btn-secondary" onclick="clearInputs()">
+                        <i class="fas fa-eraser"></i>
+                        مسح
+                    </button>
+                    <button class="btn btn-success" onclick="exportData()">
+                        <i class="fas fa-download"></i>
+                        تصدير البيانات
+                    </button>
+                </div>
+            </section>
+
+            <section class="results-section">
+                <div class="results-cards">
+                    <div class="result-card">
+                        <h3>💎 القيمة المستقبلية</h3>
+                        <div class="value" id="futureValue">0</div>
+                        <div class="currency">ريال سعودي</div>
+                    </div>
+                    <div class="result-card">
+                        <h3>💰 القيمة الحقيقية</h3>
+                        <div class="value" id="realValue">0</div>
+                        <div class="currency">بعد خصم التضخم</div>
+                    </div>
+                    <div class="result-card">
+                        <h3>📊 إجمالي الأرباح</h3>
+                        <div class="value" id="totalProfit">0</div>
+                        <div class="currency">العائد على الاستثمار</div>
+                    </div>
+                    <div class="result-card">
+                        <h3>🎯 معدل النمو</h3>
+                        <div class="value" id="growthRate">0%</div>
+                        <div class="currency">نسبة الزيادة الإجمالية</div>
+                    </div>
+                </div>
+
+                <div class="chart-container">
+                    <canvas id="growthChart"></canvas>
+                </div>
+            </section>
+        </main>
+
+        <div class="summary-section" id="summarySection" style="display: none;">
+            <h2 style="text-align: center; margin-bottom: 20px; color: #2c3e50;">
+                <i class="fas fa-chart-line"></i>
+                ملخص الاستثمار
+            </h2>
+            <div class="progress-bar">
+                <div class="progress-fill" id="progressFill"></div>
+            </div>
+            <div class="summary-grid">
+                <div class="summary-item">
+                    <div class="label">إجمالي المساهمات</div>
+                    <div class="value" id="totalContributions">0 ريال</div>
+                </div>
+                <div class="summary-item">
+                    <div class="label">فترة الاستثمار</div>
+                    <div class="value" id="investmentPeriod">0 سنة</div>
+                </div>
+                <div class="summary-item">
+                    <div class="label">معدل النمو الشهري</div>
+                    <div class="value" id="monthlyGrowth">0%</div>
+                </div>
+                <div class="summary-item">
+                    <div class="label">تأثير التضخم</div>
+                    <div class="value" id="inflationImpact">0%</div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        let chart = null;
+        let isDarkTheme = false;
+
+        function calculateFutureValue(principal, rate, years, compoundFreq, monthlyPayment = 0) {
+            const r = rate / 100;
+            let futureValue = principal * Math.pow(1 + r / compoundFreq, compoundFreq * years);
+            
+            if (monthlyPayment > 0) {
+                const monthlyRate = r / 12;
+                const months = years * 12;
+                if (monthlyRate > 0) {
+                    const futureValuePayments = monthlyPayment * (Math.pow(1 + monthlyRate, months) - 1) / monthlyRate;
+                    futureValue += futureValuePayments;
+                } else {
+                    futureValue += monthlyPayment * months;
+                }
+            }
+            
+            return futureValue;
+        }
+
+        function calculateRealValue(futureValue, inflationRate, years) {
+            return futureValue / Math.pow(1 + inflationRate / 100, years);
+        }
+
+        function animateNumber(element, targetValue, duration = 2000, isPercentage = false, isCurrency = true) {
+            const startValue = 0;
+            const startTime = Date.now();
+            
+            function updateNumber() {
+                const elapsed = Date.now() - startTime;
+                const progress = Math.min(elapsed / duration, 1);
+                
+                const currentValue = startValue + (targetValue - startValue) * easeOutCubic(progress);
+                
+                if (isCurrency) {
+                    element.textContent = formatCurrency(currentValue);
+                } else if (isPercentage) {
+                    element.textContent = currentValue.toFixed(1) + '%';
+                } else {
+                    element.textContent = Math.round(currentValue).toLocaleString();
+                }
+                
+                if (progress < 1) {
+                    requestAnimationFrame(updateNumber);
+                }
+            }
+            
+            updateNumber();
+        }
+
+        function easeOutCubic(t) {
+            return 1 - Math.pow(1 - t, 3);
+        }
+
+        function formatCurrency(amount) {
+            return new Intl.NumberFormat('ar-SA', {
+                minimumFractionDigits: 0,
+                maximumFractionDigits: 0
+            }).format(Math.round(amount));
+        }
+
+        function calculate() {
+            const principal = parseFloat(document.getElementById('principal').value) || 0;
+            const rate = parseFloat(document.getElementById('rate').value) || 0;
+            const years = parseFloat(document.getElementById('years').value) || 0;
+            const compoundFreq = parseInt(document.getElementById('compound').value) || 1;
+            const monthlyPayment = parseFloat(document.getElementById('payment').value) || 0;
+            const inflationRate = parseFloat(document.getElementById('inflation').value) || 0;
+
+            if (principal <= 0 || rate < 0 || years <= 0) {
+                alert('يرجى إدخال قيم صحيحة في جميع الحقول المطلوبة');
+                return;
+            }
+
+            const futureValue = calculateFutureValue(principal, rate, years, compoundFreq, monthlyPayment);
+            const realValue = calculateRealValue(futureValue, inflationRate, years);
+            const totalContributions = principal + (monthlyPayment * 12 * years);
+            const totalProfit = futureValue - totalContributions;
+            const growthRate = ((futureValue / totalContributions - 1) * 100);
+            const monthlyGrowthRate = (Math.pow(futureValue / totalContributions, 1 / (years * 12)) - 1) * 100;
+            const inflationImpact = ((futureValue - realValue) / futureValue * 100);
+
+            // تحديث النتائج مع الأنيميشن
+            animateNumber(document.getElementById('futureValue'), futureValue);
+            animateNumber(document.getElementById('realValue'), realValue);
+            animateNumber(document.getElementById('totalProfit'), totalProfit);
+            animateNumber(document.getElementById('growthRate'), growthRate, 2000, true, false);
+
+            // تحديث الملخص
+            document.getElementById('totalContributions').textContent = formatCurrency(totalContributions) + ' ريال';
+            document.getElementById('investmentPeriod').textContent = years + ' سنة';
+            document.getElementById('monthlyGrowth').textContent = monthlyGrowthRate.toFixed(2) + '%';
+            document.getElementById('inflationImpact').textContent = inflationImpact.toFixed(1) + '%';
+
+            // إظهار قسم الملخص
+            document.getElementById('summarySection').style.display = 'block';
+
+            // تحديث شريط التقدم
+            setTimeout(() => {
+                const progressPercentage = Math.min((growthRate / 500) * 100, 100);
+                document.getElementById('progressFill').style.width = progressPercentage + '%';
+            }, 500);
+
+            // رسم البيانات
+            drawChart(principal, rate, years, compoundFreq, monthlyPayment, inflationRate);
+        }
+
+        function drawChart(principal, rate, years, compoundFreq, monthlyPayment, inflationRate) {
+            const ctx = document.getElementById('growthChart').getContext('2d');
+            
+            if (chart) {
+                chart.destroy();
+            }
+
+            const labels = [];
+            const nominalData = [];
+            const realData = [];
+            const contributionsData = [];
+
+            for (let year = 0; year <= years; year++) {
+                labels.push(`السنة ${year}`);
+                
+                const nominalValue = year === 0 ? principal : calculateFutureValue(principal, rate, year, compoundFreq, monthlyPayment);
+                const realValue = calculateRealValue(nominalValue, inflationRate, year);
+                const contributions = principal + (monthlyPayment * 12 * year);
+
+                nominalData.push(nominalValue);
+                realData.push(realValue);
+                contributionsData.push(contributions);
+            }
+
+            chart = new Chart(ctx, {
+                type: 'line',
+                data: {
+                    labels: labels,
+                    datasets: [
+                        {
+                            label: 'القيمة الاسمية',
+                            data: nominalData,
+                            borderColor: '#3498db',
+                            backgroundColor: 'rgba(52, 152, 219, 0.1)',
+                            borderWidth: 3,
+                            fill: true,
+                            tension: 0.4
+                        },
+                        {
+                            label: 'القيمة الحقيقية',
+                            data: realData,
+                            borderColor: '#e74c3c',
+                            backgroundColor: 'rgba(231, 76, 60, 0.1)',
+                            borderWidth: 3,
+                            fill: true,
+                            tension: 0.4
+                        },
+                        {
+                            label: 'إجمالي المساهمات',
+                            data: contributionsData,
+                            borderColor: '#27ae60',
+                            backgroundColor: 'rgba(39, 174, 96, 0.1)',
+                            borderWidth: 3,
+                            fill: false,
+                            tension: 0.4
+                        }
+                    ]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        title: {
+                            display: true,
+                            text: 'نمو الاستثمار عبر الزمن',
+                            font: {
+                                size: 16,
+                                weight: 'bold'
+                            }
+                        },
+                        legend: {
+                            position: 'top'
+                        }
+                    },
+                    scales: {
+                        y: {
+                            beginAtZero: true,
+                            ticks: {
+                                callback: function(value) {
+                                    return formatCurrency(value);
+                                }
+                            }
+                        }
+                    },
+                    interaction: {
+                        intersect: false,
+                        mode: 'index'
+                    },
+                    animation: {
+                        duration: 2000,
+                        easing: 'easeOutCubic'
+                    }
+                }
+            });
+        }
+
+        function clearInputs() {
+            document.getElementById('principal').value = '10000';
+            document.getElementById('rate').value = '7';
+            document.getElementById('years').value = '10';
+            document.getElementById('compound').value = '12';
+            document.getElementById('payment').value = '500';
+            document.getElementById('inflation').value = '2.5';
+
+            // مسح النتائج
+            document.getElementById('futureValue').textContent = '0';
+            document.getElementById('realValue').textContent = '0';
+            document.getElementById('totalProfit').textContent = '0';
+            document.getElementById('growthRate').textContent = '0%';
+
+            // إخفاء الملخص
+            document.getElementById('summarySection').style.display = 'none';
+
+            // مسح الرسم البياني
+            if (chart) {
+                chart.destroy();
+                chart = null;
+            }
+        }
+
+        function exportData() {
+            const principal = parseFloat(document.getElementById('principal').value) || 0;
+            const rate = parseFloat(document.getElementById('rate').value) || 0;
+            const years = parseFloat(document.getElementById('years').value) || 0;
+            const compoundFreq = parseInt(document.getElementById('compound').value) || 1;
+            const monthlyPayment = parseFloat(document.getElementById('payment').value) || 0;
+            const inflationRate = parseFloat(document.getElementById('inflation').value) || 0;
+
+            if (principal <= 0) {
+                alert('يرجى حساب النتائج أولاً');
+                return;
+            }
+
+            let csvContent = "السنة,القيمة الاسمية,القيمة الحقيقية,إجمالي المساهمات,الأرباح\n";
+
+            for (let year = 0; year <= years; year++) {
+                const nominalValue = year === 0 ? principal : calculateFutureValue(principal, rate, year, compoundFreq, monthlyPayment);
+                const realValue = calculateRealValue(nominalValue, inflationRate, year);
+                const contributions = principal + (monthlyPayment * 12 * year);
+                const profit = nominalValue - contributions;
+
+                csvContent += `${year},${nominalValue.toFixed(2)},${realValue.toFixed(2)},${contributions.toFixed(2)},${profit.toFixed(2)}\n`;
+            }
+
+            const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+            const link = document.createElement('a');
+            const url = URL.createObjectURL(blob);
+            link.setAttribute('href', url);
+            link.setAttribute('download', `future_value_calculation_${new Date().toISOString().slice(0, 10)}.csv`);
+            link.style.visibility = 'hidden';
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
+        }
+
+        function toggleTheme() {
+            // هذه الوظيفة يمكن توسيعها لاحقاً لتغيير السمة
+            const button = document.querySelector('.theme-toggle i');
+            if (isDarkTheme) {
+                button.className = 'fas fa-moon';
+                isDarkTheme = false;
+            } else {
+                button.className = 'fas fa-sun';
+                isDarkTheme = true;
+            }
+        }
+
+        // تشغيل الحساب التلقائي عند تغيير المدخلات
+        document.addEventListener('DOMContentLoaded', function() {
+            const inputs = document.querySelectorAll('input, select');
+            inputs.forEach(input => {
+                input.addEventListener('input', function() {
+                    if (document.getElementById('futureValue').textContent !== '0') {
+                        setTimeout(calculate, 300);
+                    }
+                });
+            });
+        });
+
+        // حساب أولي
+        setTimeout(calculate, 1000);
+    </script>
+</body>
+</html>
